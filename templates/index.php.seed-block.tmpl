@@ -1,0 +1,13 @@
+/* ESO_SEED_BEGIN — injected by esoBB Bootstrap; safe to remove with the markers */
+if (!isset($_SESSION["install"])
+	&& empty($_POST["forumTitle"])
+	&& is_file(PATH_ROOT . "/install/install.seed.php")) {
+	$__esoSeed = include PATH_ROOT . "/install/install.seed.php";
+	if (is_array($__esoSeed)) $_SESSION["install"] = $__esoSeed;
+	unset($__esoSeed);
+}
+if (is_file(PATH_ROOT . "/install/lock")
+	&& is_file(PATH_ROOT . "/install/install.seed.php")) {
+	@unlink(PATH_ROOT . "/install/install.seed.php");
+}
+/* ESO_SEED_END */
