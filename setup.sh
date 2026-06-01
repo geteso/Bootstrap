@@ -5,7 +5,7 @@
 # Usage:
 #   sudo ./setup.sh --source /path/to/esoBB \
 #                     --domain forum.example.com \
-#                     --admin-email you@example.com
+#                     --le-email you@example.com
 #   sudo ./setup.sh --config myforum.conf
 #   sudo ./setup.sh --config setup.conf.example --dry-run
 #
@@ -24,10 +24,6 @@ WEB_SERVER="nginx"
 SCHEME="https"
 
 CFG_DOMAIN=""
-CFG_ADMIN_EMAIL=""
-CFG_ADMIN_USER=""
-CFG_FORUM_TITLE=""
-CFG_FORUM_DESCRIPTION=""
 CFG_FORUM_ROOT=""
 CFG_SOURCE=""
 CFG_DB_NAME=""
@@ -66,23 +62,15 @@ Required:
   --domain <fqdn>          Domain the forum will be served from
   --forum-root <path>      Absolute path to the document root
                            (e.g. /var/www/eso)
-  --admin-email <email>    Admin email — required only when TLS is on
-                           (used to register with Let's Encrypt). Omit
-                           with --skip-ssl and the admin types one into
-                           the web installer.
+  --le-email <email>       Email registered with Let's Encrypt. Required
+                           unless --skip-ssl is set.
 
 Optional:
   --config <file>          Load settings from a config file (KEY=VALUE)
   --web-server <nginx|apache>   Default: nginx
-  --admin-user <name>      Admin username (blank by default — installer
-                           shows its own placeholder and the admin types
-                           a real one in the browser)
-  --forum-title <text>     Forum title (blank by default — same as above)
-  --forum-description <text>   Blank by default — same as above
   --db-name <name>         Default: auto-generated as esodb_<random>
   --db-user <name>         Default: auto-generated as esouser_<random>
   --db-pass <pass>         Default: randomly generated
-  --le-email <email>       Let's Encrypt email (default: --admin-email)
   --le-staging             Use the Let's Encrypt staging environment
   --skip-ssl               Serve over plain HTTP (no certbot)
   --refresh-source         Force re-download even if the source cache is
@@ -130,8 +118,7 @@ _expand_rand() {
 # Expand <Nrand> tokens in templatable CFG_* variables.
 _expand_rand_inputs() {
 	local var val expanded
-	for var in CFG_ADMIN_EMAIL CFG_ADMIN_USER \
-	           CFG_FORUM_TITLE CFG_FORUM_DESCRIPTION CFG_FORUM_ROOT \
+	for var in CFG_FORUM_ROOT \
 	           CFG_DB_NAME CFG_DB_USER CFG_DB_PASS CFG_LE_EMAIL; do
 		val="${!var}"
 		[ -n "$val" ] || continue
@@ -165,10 +152,6 @@ parse_args() {
 			--config)            shift 2 ;;
 			--source)            CFG_SOURCE="$2"; shift 2 ;;
 			--domain)            CFG_DOMAIN="$2"; shift 2 ;;
-			--admin-email)       CFG_ADMIN_EMAIL="$2"; shift 2 ;;
-			--admin-user)        CFG_ADMIN_USER="$2"; shift 2 ;;
-			--forum-title)       CFG_FORUM_TITLE="$2"; shift 2 ;;
-			--forum-description) CFG_FORUM_DESCRIPTION="$2"; shift 2 ;;
 			--forum-root)        CFG_FORUM_ROOT="$2"; shift 2 ;;
 			--web-server)        WEB_SERVER="$2"; shift 2 ;;
 			--db-name)           CFG_DB_NAME="$2"; shift 2 ;;
@@ -206,15 +189,15 @@ validate_inputs() {
 		fi
 		[ -n "$CFG_DOMAIN" ] || die "--domain is required."
 	fi
-	# --admin-email is only strictly required when TLS is on (certbot
-	# registers it with Let's Encrypt).
-	if [ "${SKIP_SSL:-0}" = "0" ] && [ -z "$CFG_ADMIN_EMAIL" ]; then
+	# --le-email is required when TLS is on (certbot registers it with
+	# Let's Encrypt). With --skip-ssl it's unused.
+	if [ "${SKIP_SSL:-0}" = "0" ] && [ -z "$CFG_LE_EMAIL" ]; then
 		if [ -t 0 ] && [ "$DRY_RUN" = "0" ]; then
-			printf 'Admin email (used for Let'"'"'s Encrypt): '
-			read -r CFG_ADMIN_EMAIL
+			printf 'Email for Let'"'"'s Encrypt registration: '
+			read -r CFG_LE_EMAIL
 		fi
-		[ -n "$CFG_ADMIN_EMAIL" ] \
-			|| die "--admin-email is required when TLS is enabled (or pass --skip-ssl)."
+		[ -n "$CFG_LE_EMAIL" ] \
+			|| die "--le-email is required when TLS is enabled (or pass --skip-ssl)."
 	fi
 	if [ -z "$CFG_FORUM_ROOT" ]; then
 		if [ -t 0 ] && [ "$DRY_RUN" = "0" ]; then
@@ -233,9 +216,9 @@ validate_inputs() {
 
 	[[ "$CFG_DOMAIN" =~ ^[A-Za-z0-9.-]+$ ]] \
 		|| die "Domain '$CFG_DOMAIN' looks invalid."
-	[ -z "$CFG_ADMIN_EMAIL" ] \
-		|| [[ "$CFG_ADMIN_EMAIL" =~ ^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$ ]] \
-		|| die "Admin email '$CFG_ADMIN_EMAIL' looks invalid."
+	[ -z "$CFG_LE_EMAIL" ] \
+		|| [[ "$CFG_LE_EMAIL" =~ ^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$ ]] \
+		|| die "Let's Encrypt email '$CFG_LE_EMAIL' looks invalid."
 }
 
 require_root() {

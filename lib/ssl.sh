@@ -10,8 +10,8 @@ setup_ssl() {
 	log_step "TLS certificate (Let's Encrypt)"
 	SCHEME="https"
 
-	local email="${CFG_LE_EMAIL:-$CFG_ADMIN_EMAIL}"
-	[ -n "$email" ] || die "An email is required for Let's Encrypt (set le_email or admin_email)."
+	local email="$CFG_LE_EMAIL"
+	[ -n "$email" ] || die "--le-email is required for Let's Encrypt."
 
 	local plugin
 	case "$WEB_SERVER" in

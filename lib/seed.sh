@@ -13,7 +13,7 @@ write_seed() {
 	INSTALLER_URL="${base_url}install/"
 
 	if [ "${DRY_RUN:-0}" = "1" ]; then
-		log_info "(dry-run) would write $seed (DB creds, baseURL=$base_url, admin email, blank password)"
+		log_info "(dry-run) would write $seed (DB creds, baseURL=$base_url)"
 		log_info "(dry-run) would inject ESO_SEED block into $index"
 		return 0
 	fi
@@ -21,17 +21,11 @@ write_seed() {
 	[ -f "$index" ] || die "Installer not found at $index"
 
 	# --- generate the seed file via PHP for safe escaping ----------------
-	ESO_FORUM_TITLE="${CFG_FORUM_TITLE:-My esoBB Forum}" \
-	ESO_FORUM_DESC="${CFG_FORUM_DESCRIPTION:-A forum powered by esoBB.}" \
 	ESO_DB_HOST="$DB_HOST" ESO_DB_USER="$DB_USER" \
 	ESO_DB_PASS="$DB_PASS" ESO_DB_NAME="$DB_NAME" \
-	ESO_ADMIN_USER="${CFG_ADMIN_USER:-admin}" \
-	ESO_ADMIN_EMAIL="${CFG_ADMIN_EMAIL}" \
 	ESO_BASE_URL="$base_url" \
 	php -r '
 		$seed = array(
-			"forumTitle"        => getenv("ESO_FORUM_TITLE"),
-			"forumDescription"  => getenv("ESO_FORUM_DESC"),
 			"language"          => "English (casual)",
 			"mysqlHost"         => getenv("ESO_DB_HOST"),
 			"mysqlUser"         => getenv("ESO_DB_USER"),
@@ -44,8 +38,6 @@ write_seed() {
 			"smtpUser"          => "",
 			"smtpPass"          => "",
 			"showSmtpConfig"    => "",
-			"adminUser"         => getenv("ESO_ADMIN_USER"),
-			"adminEmail"        => getenv("ESO_ADMIN_EMAIL"),
 			"adminPass"         => "",
 			"adminConfirm"      => "",
 			"tablePrefix"       => "et_",

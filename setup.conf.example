@@ -18,20 +18,9 @@
 #   CFG_SOURCE="https://example.org/esoBB.tar.gz"
 CFG_SOURCE="/usr/local/src/esoBB"
 CFG_DOMAIN="forum.example.com"
-# Only required when TLS is on (used for Let's Encrypt registration).
-# Leave blank if you set SKIP_SSL=1 below; the admin can fill it in via
-# the web installer.
-CFG_ADMIN_EMAIL="you@example.com"
 # Absolute path to the forum's document root (required).
 CFG_FORUM_ROOT="/var/www/eso"
 
-# --- forum identity -------------------------------------------------------
-# Leave these blank to let the admin enter them in the web installer
-# (its placeholder text already shows examples). Setting them here just
-# pre-fills the form.
-CFG_ADMIN_USER=""
-CFG_FORUM_TITLE=""
-CFG_FORUM_DESCRIPTION=""
 
 # --- deployment -----------------------------------------------------------
 # Web server: nginx or apache.
@@ -48,8 +37,9 @@ CFG_DB_HOST="localhost"
 CFG_DB_PASS=""
 
 # --- TLS / Let's Encrypt --------------------------------------------------
-# Defaults to CFG_ADMIN_EMAIL if empty.
-CFG_LE_EMAIL=""
+# Email registered with Let's Encrypt. Required when TLS is on; omit if
+# you set SKIP_SSL=1 below.
+CFG_LE_EMAIL="you@example.com"
 # Set to 1 to use the Let's Encrypt staging environment (for testing).
 CFG_LE_STAGING=0
 # Set to 1 to skip certbot entirely and serve plain HTTP.
