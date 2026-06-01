@@ -36,7 +36,7 @@ setup_ssl() {
 	# sure it's active.
 	if [ "${DRY_RUN:-0}" = "1" ]; then
 		log_info "(dry-run) would ensure certbot.timer is enabled for auto-renewal"
-	elif systemctl list-unit-files 2>/dev/null | grep -q '^certbot\.timer'; then
+	elif systemctl cat -- certbot.timer >/dev/null 2>&1; then
 		run "Ensuring certbot renewal timer is enabled" \
 			systemctl enable --now certbot.timer
 	fi

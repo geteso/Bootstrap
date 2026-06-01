@@ -47,7 +47,7 @@ _apt_updated=0
 
 pkg_refresh() {
 	[ "$_apt_updated" = "1" ] && return 0
-	run "Refreshing apt package index" env DEBIAN_FRONTEND=noninteractive apt-get update -y
+	run "Refreshing apt package index" env DEBIAN_FRONTEND=noninteractive apt-get update -y --allow-releaseinfo-change
 	_apt_updated=1
 }
 

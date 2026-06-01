@@ -5,7 +5,7 @@ PHP_FPM_SOCKET=""
 
 install_php() {
 	log_step "PHP + extensions"
-	pkg_install php-fpm php-cli php-mysqli php-mbstring php-gd
+	pkg_install php-fpm php-cli php-mysql php-mbstring php-gd
 
 	# Resolve the installed PHP-FPM version, service name, and socket path.
 	if [ "${DRY_RUN:-0}" = "1" ]; then
@@ -21,7 +21,7 @@ install_php() {
 	PHP_FPM_SERVICE="php${ver}-fpm"
 	PHP_FPM_SOCKET="/run/php/php${ver}-fpm.sock"
 
-	systemctl list-unit-files | grep -q "^${PHP_FPM_SERVICE}\.service" \
+	systemctl cat -- "${PHP_FPM_SERVICE}.service" >/dev/null 2>&1 \
 		|| die "Expected service ${PHP_FPM_SERVICE} not found."
 	svc_enable_now "$PHP_FPM_SERVICE"
 	log_ok "PHP $ver installed; FPM socket: $PHP_FPM_SOCKET"
